@@ -1,0 +1,67 @@
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, sans-serif; 
+}
+
+#menuOpener {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 100; /* Ensure the button is on top */
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    opacity: 1;
+}
+
+#menu {
+    position: absolute;
+    top: 40px;
+    right: 10px;
+    width: 220px; /* Adjust based on your needs */
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Better shadow */
+    opacity: 0; /* Start hidden */
+    visibility: hidden; /* Ensure it's not interactable when hidden */
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; /* Smooth transition */
+    z-index: 100; /* Ensure it's above the canvas */
+    pointer-events: auto;
+
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#menu.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+#menu label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.dropdown-item {
+    cursor: pointer;
+}
+
+.selected-dropdown-item {
+    background-color: #82bcfb
+}
+
+canvas {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* Canvas is below the menu and button */
+}
