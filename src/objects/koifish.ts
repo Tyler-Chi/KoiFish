@@ -153,7 +153,7 @@ class KoiFish implements EnvironmentObject {
         this.direction = options?.direction || Vector.getRandomDirection();
 
         // The size dictates some of the other fish traits
-        this.size = options?.size || getRandomNumber(0.7, 1.0);
+        this.size = options?.size || getRandomNumber(0.5, 1.0);
 
         // Calculate fish lengths using size
         this.scaledFishLengths = this.getScaledFishLengths();

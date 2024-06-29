@@ -19,7 +19,7 @@ objectManager.setupEventListeners();
 
 export const drawManager = new DrawManager();
 
-const targetFPS = 60; // Specify your desired frame rate here
+const targetFPS = 120; // Specify your desired frame rate here
 const interval = 1000 / targetFPS; // Calculate the interval between frames
 
 let lastTime = performance.now();
