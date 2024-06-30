@@ -41,8 +41,14 @@ export default class Oscillator {
         this.speedFactor = factor;
     }
 
-    public getValue(): number {
+    public getValue(periodOffset: number = 0): number {
         this.update();
-        return this.value;
+        const offsetPhase =
+            2 * Math.PI * (periodOffset / this.period) * this.speedFactor;
+        return (
+            this.min +
+            this.amplitude +
+            this.amplitude * Math.sin(this.phase + offsetPhase)
+        );
     }
 }

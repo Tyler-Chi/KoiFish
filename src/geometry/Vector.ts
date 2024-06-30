@@ -132,8 +132,12 @@ export default class Vector {
         return new Vector(dx, dy).normalize();
     };
 
+    // pure vectors
     static UP = new Vector(0, 1);
     static RIGHT = new Vector(1, 0);
     static DOWN = new Vector(0, -1);
     static LEFT = new Vector(-1, 0);
+    // mixed vectors
+    static DOWN_RIGHT = new Vector(1, -1).normalize();
+    static DOWN_LEFT = new Vector(-1, -1).normalize();
 }

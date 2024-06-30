@@ -14,6 +14,8 @@ import Point from '../geometry/Point';
 import { RippleDrawSettings } from '../objects/ripple';
 import Vector from '../geometry/Vector';
 import { WavePoints } from '../objects/wave';
+import { drawManager } from '..';
+import { DrawLayer } from '../drawManager';
 
 export const clearCanvasDrawings = (): void => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -28,14 +30,16 @@ export const drawPoint = (
     point: Point,
     { radius = 1, color = 'black' }: { radius?: number; color?: string } = {},
 ): void => {
-    const [x, y] = point.getCoordinates();
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = color;
-    ctx.stroke();
+    drawManager.scheduleDraw(DrawLayer.DEV, () => {
+        const [x, y] = point.getCoordinates();
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = color;
+        ctx.stroke();
+    });
 };
 
 export const drawLine = (
@@ -109,11 +113,10 @@ export const drawFish = (
         rightPectoralFinFrontEdge,
         rightPectoralFinBackEdge,
         rightPectoralFinTip,
-        tailFinAnchor,
         leftTailFinTip,
         rightTailFinTip,
-        extrapolatedTailFinTip,
         trunkTailJoint,
+        ventralFinBase,
         leftVentralFinFrontEdge,
         leftVentralFinTip,
         leftVentralFinBackEdge,
@@ -124,53 +127,58 @@ export const drawFish = (
         dorsalFinEnd,
         dorsalFinAnchor,
         dorsalFinTip,
+        upperTailAnchor,
+        lowerTailAnchor,
+        extrapolatedTailAnchor,
     } = drawPoints;
 
     // Draw tail fins first, so that they do not cover the main body
 
     // Left tail fin
     ctx.beginPath();
-    ctx.moveTo(...tailFinAnchor.getCoordinates());
+    ctx.lineWidth = 1;
+    ctx.moveTo(...lowerTailAnchor.getCoordinates());
     ctx.lineTo(...leftTailFinTip.getCoordinates());
+
     ctx.quadraticCurveTo(
-        ...extrapolatedTailFinTip.getCoordinates(),
-        ...tailFinAnchor.getCoordinates(),
+        ...extrapolatedTailAnchor.getCoordinates(),
+        ...lowerTailAnchor.getCoordinates(),
     );
+
     ctx.fillStyle = fishColors.tailFinColor;
     ctx.fill();
 
     // Right tail fin
     ctx.beginPath();
-    ctx.moveTo(...tailFinAnchor.getCoordinates());
+    ctx.lineWidth = 1;
+    ctx.moveTo(...lowerTailAnchor.getCoordinates());
     ctx.lineTo(...rightTailFinTip.getCoordinates());
+
     ctx.quadraticCurveTo(
-        ...extrapolatedTailFinTip.getCoordinates(),
-        ...tailFinAnchor.getCoordinates(),
+        ...extrapolatedTailAnchor.getCoordinates(),
+        ...lowerTailAnchor.getCoordinates(),
     );
+
     ctx.fillStyle = fishColors.tailFinColor;
     ctx.fill();
 
-    // Left
-    // for pectoral/ventral finsventral fin
+    // Left ventral fin
     traceFin(
-        trunkTailJoint,
+        ventralFinBase,
         leftVentralFinFrontEdge,
         leftVentralFinBackEdge,
         leftVentralFinTip,
     );
-
     ctx.fillStyle = fishColors.finColor;
     ctx.fill();
 
-    // Right
-    // for pectoral/ventral fins ventral fin
+    // RIght ventral fin
     traceFin(
-        trunkTailJoint,
+        ventralFinBase,
         rightVentralFinFrontEdge,
         rightVentralFinBackEdge,
         rightVentralFinTip,
     );
-
     ctx.fillStyle = fishColors.finColor;
     ctx.fill();
 
@@ -185,10 +193,16 @@ export const drawFish = (
     ctx.clip();
 
     decorationDrawInfos.forEach((decorationDrawInfo) => {
-        drawPoint(decorationDrawInfo.position, {
-            radius: decorationDrawInfo.radius,
-            color: decorationDrawInfo.color,
-        });
+        const decorationPosition = decorationDrawInfo.position;
+
+        const [x, y] = decorationPosition.getCoordinates();
+        ctx.beginPath();
+        ctx.arc(x, y, decorationDrawInfo.radius, 0, 2 * Math.PI, false);
+        ctx.fillStyle = decorationDrawInfo.color;
+        ctx.fill();
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = decorationDrawInfo.color;
+        ctx.stroke();
     });
 
     // Imagine the fish as a rectangle, draw a gradient
@@ -223,6 +237,7 @@ export const drawFish = (
     ctx.fillStyle = fishColors.finColor;
     ctx.fill();
 
+    // right pectoral fin
     traceFin(
         trunkRightTop,
         rightPectoralFinFrontEdge,
@@ -230,7 +245,6 @@ export const drawFish = (
         rightPectoralFinTip,
     );
 
-    // right pectoral fin
     ctx.fillStyle = fishColors.finColor;
     ctx.fill();
 
@@ -370,9 +384,10 @@ export const traceFishBody = (drawPoints: FishDrawPoints): void => {
         trunkRightBottom,
         trunkLeftBottom,
         trunkLeftTop,
-        tailAnchor,
-        tailLeftOuterAnchor,
-        tailRightOuterAnchor,
+        upperTailLeftAnchor,
+        upperTailRightAnchor,
+        lowerTailLeftAnchor,
+        lowerTailRightAnchor,
         tailTip,
     } = drawPoints;
     ctx.beginPath();
@@ -390,15 +405,15 @@ export const traceFishBody = (drawPoints: FishDrawPoints): void => {
 
     // Right side of the tail
     ctx.bezierCurveTo(
-        ...tailRightOuterAnchor.getCoordinates(),
-        ...tailAnchor.getCoordinates(),
+        ...upperTailRightAnchor.getCoordinates(),
+        ...lowerTailRightAnchor.getCoordinates(),
         ...tailTip.getCoordinates(),
     );
 
     // Left side of the tail, back up towards the body
     ctx.bezierCurveTo(
-        ...tailAnchor.getCoordinates(),
-        ...tailLeftOuterAnchor.getCoordinates(),
+        ...lowerTailLeftAnchor.getCoordinates(),
+        ...upperTailLeftAnchor.getCoordinates(),
         ...trunkLeftBottom.getCoordinates(),
     );
 };
@@ -489,6 +504,51 @@ export const getArcPoints = (
 
     const arcPoint = new Point(midpoint.x + vector.dx, midpoint.y + vector.dy);
     return { arcPoint, midPoint: new Point(midpoint.x, midpoint.y) };
+};
+
+export interface PerpindicularPoints {
+    point1: Point;
+    point2: Point;
+}
+export const getPerpindicularPoints = (
+    pointA: Point,
+    pointB: Point,
+    distance: number,
+): PerpindicularPoints => {
+    // Calculate the midpoint
+    const midX = (pointA.x + pointB.x) / 2;
+    const midY = (pointA.y + pointB.y) / 2;
+
+    // Calculate the direction of the line
+    const dx = pointB.x - pointA.x;
+    const dy = pointB.y - pointA.y;
+
+    // Calculate the length of the original line
+    const length = Math.sqrt(dx * dx + dy * dy);
+
+    // Normalize the direction to get a unit vector
+    const unitDx = dx / length;
+    const unitDy = dy / length;
+
+    // Calculate the perpendicular direction
+    const perpDx = -unitDy;
+    const perpDy = unitDx;
+
+    // Calculate the two points perpendicular to the midpoint
+    const perpPoint1 = new Point(
+        midX + perpDx * distance,
+        midY + perpDy * distance,
+    );
+
+    const perpPoint2 = new Point(
+        midX - perpDx * distance,
+        midY - perpDy * distance,
+    );
+
+    return {
+        point1: perpPoint1,
+        point2: perpPoint2,
+    };
 };
 
 export const getSquarePoints = (
