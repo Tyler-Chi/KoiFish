@@ -169,7 +169,7 @@ class KoiFish implements EnvironmentObject {
         );
 
         // Oscillator to make the tail wave back and forth
-        this.tailAngleOscillator = new Oscillator(-8, 8, getRandomNumber(3, 4));
+        this.tailAngleOscillator = new Oscillator(-7, 7, getRandomNumber(3, 4));
 
         // Oscillator to make the fish sway (rotionally)
         this.swayOscillator = new Oscillator(-3, 3, getRandomNumber(30, 40));
@@ -812,11 +812,9 @@ class KoiFish implements EnvironmentObject {
         // lowerAnchor
         // tailTip
         // this it to make the tail wave, like a flag, rather than wag
-
-        const tailAngle = this.tailAngleOscillator.getValue();
-        const upperTailAnchorAngle = this.tailAngleOscillator.getValue(0.6);
-        const lowerTailAnchorAngle =
-            this.tailAngleOscillator.getValue(0.3) / 1.3;
+        const upperTailAnchorAngle = this.tailAngleOscillator.getValue();
+        const lowerTailAnchorAngle = this.tailAngleOscillator.getValue(-0.3); // slightly lags behind upperTailAngle
+        const tailTipAngle = this.tailAngleOscillator.getValue(-0.7) * 3; // big lag behind upperTailAngle, but exaggerated motion
 
         const upperTailAnchor = trunkTailJoint.applyVector(
             Vector.DOWN.rotateVector(upperTailAnchorAngle).scale(
@@ -824,30 +822,38 @@ class KoiFish implements EnvironmentObject {
             ),
         );
 
-        const lowerTailAnchor = trunkTailJoint.applyVector(
+        const lowerTailAnchor = upperTailAnchor.applyVector(
             Vector.DOWN.rotateVector(lowerTailAnchorAngle).scale(
-                0.66 * tailLength,
+                0.33 * tailLength,
             ),
         );
 
         // Upper tail anchors
         const upperTailLeftAnchor = upperTailAnchor.applyVector(
-            Vector.LEFT.rotateVector(tailAngle).scale(0.5 * trunkWidth),
+            Vector.LEFT.rotateVector(upperTailAnchorAngle).scale(
+                0.4 * trunkWidth,
+            ),
         );
         const upperTailRightAnchor = upperTailAnchor.applyVector(
-            Vector.RIGHT.rotateVector(tailAngle).scale(0.5 * trunkWidth),
+            Vector.RIGHT.rotateVector(upperTailAnchorAngle).scale(
+                0.4 * trunkWidth,
+            ),
         );
 
         // Lower tail anchors
         const lowerTailLeftAnchor = lowerTailAnchor.applyVector(
-            Vector.LEFT.rotateVector(tailAngle).scale(0.05 * trunkWidth),
+            Vector.LEFT.rotateVector(lowerTailAnchorAngle).scale(
+                0.05 * trunkWidth,
+            ),
         );
         const lowerTailRightAnchor = lowerTailAnchor.applyVector(
-            Vector.RIGHT.rotateVector(tailAngle).scale(0.05 * trunkWidth),
+            Vector.RIGHT.rotateVector(lowerTailAnchorAngle).scale(
+                0.05 * trunkWidth,
+            ),
         );
 
-        const tailTip = trunkTailJoint.applyVector(
-            Vector.DOWN.rotateVector(tailAngle).scale(tailLength),
+        const tailTip = lowerTailAnchor.applyVector(
+            Vector.DOWN.rotateVector(tailTipAngle).scale(0.33 * tailLength),
         );
 
         // Dorsal fin points
@@ -861,7 +867,9 @@ class KoiFish implements EnvironmentObject {
             0.5,
         );
         const dorsalFinTip = trunkTailJoint.applyVector(
-            Vector.DOWN.rotateVector(tailAngle * 2).scale(tailLength * 0.2),
+            Vector.DOWN.rotateVector(lowerTailAnchorAngle * 4).scale(
+                tailLength * 0.2,
+            ),
         );
 
         // Ventral fins
@@ -872,9 +880,9 @@ class KoiFish implements EnvironmentObject {
         const ventralFinLength = finLength * 0.7;
 
         const leftVentralFinTip = ventralFinBase.applyVector(
-            Vector.DOWN_LEFT.rotateVector(tailAngle + ventralFinAngle).scale(
-                ventralFinLength,
-            ),
+            Vector.DOWN_LEFT.rotateVector(
+                upperTailAnchorAngle + ventralFinAngle,
+            ).scale(ventralFinLength),
         );
 
         const {
@@ -887,9 +895,9 @@ class KoiFish implements EnvironmentObject {
         );
 
         const rightVentralFinTip = ventralFinBase.applyVector(
-            Vector.DOWN_RIGHT.rotateVector(tailAngle - ventralFinAngle).scale(
-                ventralFinLength,
-            ),
+            Vector.DOWN_RIGHT.rotateVector(
+                upperTailAnchorAngle - ventralFinAngle,
+            ).scale(ventralFinLength),
         );
 
         const {
@@ -909,11 +917,11 @@ class KoiFish implements EnvironmentObject {
         );
 
         const leftTailFinTip = extrapolatedTailAnchor.applyVector(
-            Vector.LEFT.rotateVector(tailAngle).scale(tailFinLength * 0.7),
+            Vector.LEFT.rotateVector(tailTipAngle).scale(tailFinLength * 0.8),
         );
 
         const rightTailFinTip = extrapolatedTailAnchor.applyVector(
-            Vector.RIGHT.rotateVector(tailAngle).scale(tailFinLength * 0.7),
+            Vector.RIGHT.rotateVector(tailTipAngle).scale(tailFinLength * 0.8),
         );
 
         const originalDrawPoints: FishDrawPoints = {
