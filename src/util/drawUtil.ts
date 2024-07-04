@@ -448,7 +448,7 @@ export const drawFoodParticle = (
         ...tip.getCoordinates(),
     );
 
-    ctx.strokeStyle = 'green';
+    ctx.strokeStyle = 'rgb(5,71,42)';
     ctx.lineWidth = 1;
     ctx.lineCap = 'round';
     ctx.stroke();
