@@ -175,7 +175,7 @@ class KoiFish implements EnvironmentObject {
         this.swayOscillator = new Oscillator(-3, 3, getRandomNumber(30, 40));
 
         // Bigger fish moves more slowly
-        this.baseSpeed = scaleToRange(12, 27, 1 - Math.min(this.size, 1));
+        this.baseSpeed = scaleToRange(15, 30, 1 - Math.min(this.size, 1));
 
         this.speed = this.baseSpeed;
         this.previousSpeed = this.baseSpeed;
