@@ -102,6 +102,7 @@
         },
         "Sky Blue": {
             "objectDensities": {
+                "fishPerSquareInch": 0.2,
                 "petalsPerSquareInch": 0.6,
                 "wavesPerSquareInch": 0.01
             },
